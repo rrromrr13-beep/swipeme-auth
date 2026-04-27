@@ -34,102 +34,59 @@
       align-items: center;
       justify-content: center;
     }
-    .logo svg { width: 48px; height: 48px; }
     h1 { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
     p { font-size: 15px; color: #888; line-height: 1.6; margin-bottom: 24px; }
-    .btn {
-      display: inline-block;
-      background: #6c47ff;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 14px 32px;
-      border-radius: 14px;
-      text-decoration: none;
-      margin-bottom: 12px;
-      width: 100%;
-    }
-    .btn-outline {
-      display: inline-block;
-      border: 1.5px solid #6c47ff;
+    .success { color: #22c55e; font-size: 48px; margin-bottom: 16px; }
+    .error { color: #ef4444; font-size: 48px; margin-bottom: 16px; }
+    .status { font-size: 12px; color: #bbb; margin-top: 16px; }
+    .instruction {
+      background: #f0eeff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 13px;
       color: #6c47ff;
-      font-size: 15px;
-      font-weight: 600;
-      padding: 12px 32px;
-      border-radius: 14px;
-      text-decoration: none;
-      width: 100%;
+      line-height: 1.6;
     }
-    .status { font-size: 13px; color: #bbb; margin-top: 20px; }
-    .success { color: #22c55e; font-size: 40px; margin-bottom: 16px; }
-    .error { color: #ef4444; font-size: 40px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="logo">
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="48" height="48" viewBox="0 0 48 48">
         <rect x="4" y="10" width="16" height="28" rx="8" fill="white" opacity="0.95"/>
         <rect x="28" y="10" width="16" height="28" rx="8" fill="white" opacity="0.5"/>
         <circle cx="24" cy="24" r="6" fill="white"/>
         <text x="24" y="27.5" text-anchor="middle" font-size="5.5" font-weight="700" fill="#6c47ff" font-family="system-ui">VS</text>
       </svg>
     </div>
-
     <div id="content">
       <h1>Chargement...</h1>
-      <p>Vérification de votre compte en cours.</p>
     </div>
   </div>
-
   <script>
     const params = new URLSearchParams(window.location.search)
-    const hash = new URLSearchParams(window.location.hash.replace('#', '?'))
-    
-    const token = params.get('token') || hash.get('access_token')
-    const type = params.get('type') || hash.get('type')
+    const hash = window.location.hash ? new URLSearchParams(window.location.hash.substring(1)) : new URLSearchParams()
     const error = params.get('error') || hash.get('error')
     const errorDesc = params.get('error_description') || hash.get('error_description')
-
     const content = document.getElementById('content')
-
     if (error) {
       content.innerHTML = `
         <div class="error">✗</div>
-        <h1>Lien expiré</h1>
-        <p>${errorDesc || "Ce lien de confirmation a expiré ou est invalide. Veuillez vous réinscrire."}</p>
-        <a href="swipeme://" class="btn">Ouvrir SwipeMe</a>
+        <h1>Lien invalide</h1>
+        <p>${decodeURIComponent((errorDesc || 'Ce lien a expiré ou est invalide.').replace(/\+/g, ' '))}</p>
+        <div class="instruction">Retournez sur SwipeMe et recommencez l'inscription.</div>
       `
-    } else if (token || type === 'signup' || type === 'email_confirmation') {
-      // Construire le deep link vers l'app
-      const deepLink = 'swipeme://auth/callback?' + window.location.search.replace('?', '') + window.location.hash.replace('#', '&')
-      
-      content.innerHTML = `
-        <div class="success">✓</div>
-        <h1>Email confirmé !</h1>
-        <p>Votre compte SwipeMe est activé. Appuyez sur le bouton ci-dessous pour ouvrir l'application.</p>
-        <a href="${deepLink}" class="btn">Ouvrir SwipeMe</a>
-        <br/>
-        <a href="swipeme://" class="btn-outline" style="margin-top:8px;">Accueil SwipeMe</a>
-        <p class="status">Si l'app ne s'ouvre pas, assurez-vous que SwipeMe est installé sur votre appareil.</p>
-      `
-
-      // Tentative de redirection automatique après 1.5s
-      setTimeout(() => {
-        window.location.href = deepLink
-      }, 1500)
-
     } else {
       content.innerHTML = `
         <div class="success">✓</div>
-        <h1>Compte confirmé !</h1>
-        <p>Votre adresse email a bien été vérifiée. Vous pouvez maintenant vous connecter à SwipeMe.</p>
-        <a href="swipeme://" class="btn">Ouvrir SwipeMe</a>
-        <p class="status">Si l'app ne s'ouvre pas, assurez-vous que SwipeMe est installé sur votre appareil.</p>
+        <h1>Email confirmé !</h1>
+        <p>Votre compte SwipeMe est activé avec succès.</p>
+        <div class="instruction">
+          📱 Ouvrez l'application SwipeMe sur votre téléphone et connectez-vous avec votre email et mot de passe.
+        </div>
+        <p class="status">Vous pouvez fermer cette page.</p>
       `
-      setTimeout(() => {
-        window.location.href = 'swipeme://'
-      }, 1500)
     }
   </script>
 </body>
